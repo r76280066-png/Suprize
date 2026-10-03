@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Senin Sürprizin</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Security Modal */
+    #security-modal {
+      position: fixed;
+      inset: 0;
+      background: #f0f2f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      width: 90%;
+      max-width: 380px;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background: #1e293b;
+      color: white;
+      padding: 16px 20px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .modal-body {
+      padding: 24px 20px;
+      text-align: center;
+    }
+
+    .modal-body p {
+      color: #64748b;
+      margin-bottom: 20px;
+      font-size: 15px;
+    }
+
+    .city-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .city-btn {
+      padding: 14px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: #f8fafc;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #334155;
+    }
+
+    .city-btn:hover {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+    }
+
+    .city-btn:active {
+      transform: scale(0.98);
+    }
+
+    .error-msg {
+      color: #ef4444;
+      font-size: 14px;
+      min-height: 20px;
+      margin-top: 8px;
+    }
+
+    .success-msg {
+      color: #22c55e;
+      font-size: 16px;
+      font-weight: 600;
+      min-height: 20px;
+      margin-top: 8px;
+    }
+
+    /* Main Surprise Screen */
+    #surprise-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #start-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 18px 40px;
+      font-size: 22px;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #start-btn:hover {
+      background: #dc2626;
+      transform: scale(1.05);
+      box-shadow: 0 0 40px rgba(239, 68, 68, 0.8);
+    }
+
+    /* Background after start */
+    #bg-container {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+    }
+
+    #bg-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.7);
+    }
+
+    /* Overlay for text and roses */
+    #overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      pointer-events: none;
+    }
+
+    #message-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: clamp(28px, 6vw, 48px);
+      font-weight: 700;
+      text-align: center;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.9), 0 0 40px rgba(239,68,68,0.5);
+      opacity: 0;
+      transition: opacity 1.5s ease;
+      max-width: 90%;
+      line-height: 1.3;
+      padding: 20px;
+    }
+
+    #message-text.visible {
+      opacity: 1;
+    }
+
+    /* Roses */
+    .rose {
+      position: absolute;
+      font-size: 28px;
+      pointer-events: none;
+      animation: floatRose linear forwards;
+      z-index: 70;
+      filter: drop-shadow(0 0 6px rgba(255,0,0,0.6));
+    }
+
+    @keyframes floatRose {
+      0% {
+        transform: translateY(0) rotate(0deg) scale(0.5);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+        transform: translateY(-20px) rotate(20deg) scale(1);
+      }
+      100% {
+        transform: translateY(-120vh) rotate(720deg) scale(0.8);
+        opacity: 0;
+      }
+    }
+
+    /* End screen */
+    #end-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: white;
+      text-align: center;
+    }
+
+    #end-screen h1 {
+      font-size: 36px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 20px rgba(239,68,68,0.8);
+    }
+
+    #end-screen p {
+      font-size: 18px;
+      opacity: 0.8;
+    }
+
+    audio {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Security Modal -->
+  <div id="security-modal">
+    <div class="modal-card">
+      <div class="modal-header">Güvenlik Doğrulaması</div>
+      <div class="modal-body">
+        <p>Lütfen yaşadığınız ülkeyi seçin:</p>
+        <div class="city-grid">
+          <button class="city-btn" data-city="Hollanda">Hollanda</button>
+          <button class="city-btn" data-city="Amerika">Amerika</button>
+          <button class="city-btn" data-city="Çin">Çin</button>
+          <button class="city-btn" data-city="Almanya">Almanya</button>
+        </div>
+        <div id="feedback" class="error-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Surprise Start Screen -->
+  <div id="surprise-screen">
+    <button id="start-btn">Sürprizi Başlat 🌹</button>
+  </div>
+
+  <!-- Background Image -->
+  <div id="bg-container">
+    <img id="bg-image" src="background.png" alt="Sürpriz">
+  </div>
+
+  <!-- Overlay for messages and roses -->
+  <div id="overlay">
+    <div id="message-text"></div>
+  </div>
+
+  <!-- End Screen -->
+  <div id="end-screen">
+    <h1>🌹 İyi ki varsın 🌹</h1>
+    <p>Sürpriz bitti...</p>
+  </div>
+
+  <audio id="audio" src="Hollanda.mp3" preload="auto"></audio>
+
+  <script>
+    const correctCity = "Hollanda";
+    const messages = [
+      "Tek Kader Hollanda",
+      "Tek Kader Modeon",
+      "Can Evim Can Abim",
+      "Beton Yetmez",
+      "Seni Sevmeyen Kız Ölsün",
+      "İyiki Varsın Aslan Abim"
+    ];
+
+    const securityModal = document.getElementById('security-modal');
+    const feedback = document.getElementById('feedback');
+    const surpriseScreen = document.getElementById('surprise-screen');
+    const startBtn = document.getElementById('start-btn');
+    const bgContainer = document.getElementById('bg-container');
+    const overlay = document.getElementById('overlay');
+    const messageText = document.getElementById('message-text');
+    const endScreen = document.getElementById('end-screen');
+    const audio = document.getElementById('audio');
+
+    // City selection
+    document.querySelectorAll('.city-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const city = btn.dataset.city;
+        if (city === correctCity) {
+          feedback.className = 'success-msg';
+          feedback.textContent = 'Başarılı Yönlendirildiniz';
+          setTimeout(() => {
+            securityModal.style.display = 'none';
+            surpriseScreen.style.display = 'flex';
+          }, 1200);
+        } else {
+          feedback.className = 'error-msg';
+          feedback.textContent = 'Yanlış Tercih';
+        }
+      });
+    });
+
+    // Start surprise
+    startBtn.addEventListener('click', () => {
+      surpriseScreen.style.display = 'none';
+      bgContainer.style.display = 'block';
+      overlay.style.display = 'block';
+
+      // Play audio
+      audio.play().catch(e => console.log('Audio play failed:', e));
+
+      // Start rose rain continuously
+      startRoseRain();
+
+      // Show messages every 15 seconds
+      showMessages();
+    });
+
+    function createRose() {
+      const rose = document.createElement('div');
+      rose.className = 'rose';
+      rose.textContent = '🌹';
+      rose.style.left = Math.random() * 100 + 'vw';
+      rose.style.bottom = '-50px';
+      rose.style.fontSize = (20 + Math.random() * 25) + 'px';
+      rose.style.animationDuration = (6 + Math.random() * 6) + 's';
+      document.body.appendChild(rose);
+
+      // Remove after animation
+      setTimeout(() => {
+        rose.remove();
+      }, 12000);
+    }
+
+    function startRoseRain() {
+      // Initial burst
+      for (let i = 0; i < 15; i++) {
+        setTimeout(() => createRose(), i * 150);
+      }
+      // Continuous
+      setInterval(() => {
+        createRose();
+        if (Math.random() > 0.5) createRose();
+      }, 800);
+    }
+
+    function showMessages() {
+      let index = 0;
+
+      function showNext() {
+        if (index >= messages.length) {
+          // End after last message is shown for a bit
+          setTimeout(() => {
+            endScreen.style.display = 'flex';
+            // Stop creating new roses eventually, but let existing fade
+          }, 8000);
+          return;
+        }
+
+        messageText.textContent = messages[index];
+        messageText.classList.add('visible');
+
+        // Hide after ~12s, then next after 15s total
+        setTimeout(() => {
+          messageText.classList.remove('visible');
+        }, 12000);
+
+        index++;
+        setTimeout(showNext, 15000);
+      }
+
+      // First message after a short delay
+      setTimeout(showNext, 2000);
+    }
+  </script>
+</body>
+</html>
